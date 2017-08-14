@@ -1,0 +1,104 @@
+<div>
+	<md-toolbar class="md-table-toolbar md-default" ng-show="!showSearch">
+		<div class="md-toolbar-tools">
+			<span>LOCALIZAÇÃO</span>
+			<span flex></span>
+			<md-button class="md-raised" ng-click="showModalLocation(location)" aria-label="location">ADICIONAR</md-button>
+			<md-button ng-click="showSearch = true">
+				<md-icon class="whitet">search</md-icon>
+			</md-button>
+		</div>
+	</md-toolbar>
+	<md-toolbar class="md-hue-1 search_tables" ng-show="showSearch">
+		<div class="md-toolbar-tools">
+			<md-input-container md-theme="input" flex>
+				<label>&nbsp;</label>
+				<input ng-model="search" placeholder="Pesquisar">
+			</md-input-container>
+			<md-button ng-click="showSearch = false; search = '';">
+				<md-icon>close</md-icon>
+			</md-button>
+		</div>
+	</md-toolbar>
+	<div >
+		<md-content>
+			<md-tabs md-selected="selectedIndex" md-dynamic-height md-border-bottom>
+				<md-tab label="Localização">
+					<md-content class="md-padding">
+						<md-table-container>
+							<table md-table  multiple  md-progress="promise">
+								<thead md-head md-order="query.order" md-on-reorder="getDesserts">
+									<tr md-row>
+										<th md-column><span>ID</span></th>
+										<th md-column><span>Nome</span></th>
+									</tr>
+								</thead>
+								<tbody md-body>
+									<tr md-row ng-repeat="item in locations | filter:search;">
+										<td md-cell>{{item.id}}</td>
+										<td md-cell>{{item.name}}</td>
+										<td md-cell>
+											<md-menu md-offset="0 -7">
+												<md-button aria-label="Open demo menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+													<md-icon class="material-icons">more_vert</md-icon>
+												</md-button>
+												<md-menu-content width="2">
+													<md-menu-item>
+														<md-button ng-click="showModalLocation(item,$index)">
+															<md-icon class="material-icons">edit</md-icon>
+															<span md-menu-align-target>EDITAR</span>
+														</md-button>
+													</md-menu-item>
+													<md-menu-item>
+														<md-button ng-click="deleteLocation($index , item.id)">
+															<md-icon class="material-icons">delete_forever</md-icon>
+															<span md-menu-align-target>DELETAR</span>
+														</md-button>
+													</md-menu-item>
+												</md-menu-content>
+											</md-menu>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</md-table-container>
+					</md-content>
+				</md-tab>
+			</md-tabs>
+		</md-content>
+	</div>
+</div>
+
+<script type="text/ng-template" id="locationModal.html">
+	<md-dialog aria-label="locationModal">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>{{title}}</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="cancel()">
+					<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-dialog-content>
+			<div class="md-dialog-content" style="min-width:950px;">
+				<form name="locationForm">
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='100'>
+							<label>Localização</label>
+							<input required name="location" ng-model="location.name">
+							<div ng-messages="locationForm.location.$error">
+								<div ng-message="required">Localização é obrigatório.</div>
+							</div>
+						</md-input-container>
+					</div>
+				</form>
+			</div>
+		</md-dialog-content>
+		<md-dialog-actions layout="row">
+			<span flex></span>
+			<md-button ng-click="cancel()">CANCELAR</md-button>
+			<md-button ng-disabled="locationForm.$invalid" ng-click="save(location)">CONFIRMAR</md-button>
+		</md-dialog-actions>
+	</md-dialog>
+</script>

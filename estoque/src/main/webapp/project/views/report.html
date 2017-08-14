@@ -1,0 +1,75 @@
+<h2>Book sales</h2>
+<table style='border-style:solid'>
+  <tr>
+    <th>Name</th>
+    <th>Author</th>
+    <th>Sales</th>
+  </tr>
+  {{#each books}}
+  <tr>
+    <td>{{name}}</td>
+    <td>{{author}}</td>
+    <td>{{sales}}</td>
+  </tr>  
+  {{/each}}    
+</table>
+
+<h2>The book of the month</h2>
+<span>{{mostSelling books}}</span>
+
+
+<h2>Book sales chart</h2> 
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.categories.min.js"></script>
+<div id="placeholder1" style="width:700px;height:350px"></div>
+
+<script>
+    $(function () {
+        // stringified input data are later in browser interpretted as real object
+        var data = {{{toJSON books}}}
+        var books = data.map(function(b) { return [ b.name, b.sales ]});
+        $.plot("#placeholder1", [ books ],
+          {
+             series: {
+                bars: { show: true, barWidth: 0.6, align: "center" }
+             },
+             xaxis: {   mode: "categories", tickLength: 0 }
+          });
+          
+    });
+    
+    function mostSelling(books) {
+        var max = { sales: 0 };
+        books.forEach(function (b) {
+            if (b.sales > max.sales) {
+                max = b
+            }
+        });
+        
+        return max.name + ' ' + max.sales;
+    }
+
+    function toJSON(data) {
+        return JSON.stringify(data);
+    }
+</script>
+
+<!-- function beforeRender(done) {
+    //you can use a server side running script to load remote data
+    //or do other template preprocessing
+    //http://jsreport.net/learn/scripts
+    request.data.generatedOn = new Date();
+    done();
+}
+
+{
+  "books": [
+    {"name": "A Tale of Two Cities", "author": "Charles Dickens", "sales": 351},
+    {"name": "The Lord of the Rings", "author": "J. R. R. Tolkien", "sales": 125},
+    {"name": "The Da Vinci Code", "author": "Dan Brown", "sales": 255},
+    {"name": "The Hobbit", "author": "J. R. R. Tolkien", "sales": 99}
+  ]
+}
+
+ -->

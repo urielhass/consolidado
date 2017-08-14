@@ -1,0 +1,241 @@
+<div>
+	<md-toolbar class="md-table-toolbar md-default">
+		<div class="md-toolbar-tools">
+			<span>UNIDADES</span>
+			<span flex></span>
+			<div ng-show="showSearch" flex="auto">
+				<md-button style="float: right;" class="md-icon-button" aria-label="Search" ng-click="showSearch = false; search = '';">
+					<md-icon class="whitet">close</md-icon>
+				</md-button>
+				<input class="input-search" ng-model="search" placeholder="Pesquisar...">
+			</div>
+			<div ng-show="!showSearch">
+				<md-button ng-show="selectedIndex == 0" class="md-raised" ng-click="showModalUnity(cities)" aria-label="unity">ADICIONAR</md-button>
+				<md-button ng-show="selectedIndex == 1" class="md-raised" ng-click="showModalCity()" aria-label="city">ADICIONAR</md-button>
+				<md-button class="md-icon-button" aria-label="Search" ng-click="showSearch = true">
+					<md-icon class="whitet">search</md-icon>
+				</md-button>
+			</div>
+		</div>
+	</md-toolbar>
+	<div>
+		<md-content>
+			<md-tabs md-selected="selectedIndex" md-dynamic-height md-border-bottom>
+				<md-tab label="Unidade">
+					<md-content class="md-padding">
+						<md-table-container>
+							<table md-table multiple md-progress="promise">
+								<thead md-head md-order="query.order" md-on-reorder="getDesserts">
+									<tr md-row>
+										<th md-column><span>UNIDADE</span></th>
+										<th md-column><span>TELEFONE</span></th>
+										<th md-column><span>CENTRO DE CUSTO</span></th>
+										<th md-column><span>CIDADE</span></th>
+										<th md-column><span>AÇÃO</span></th>
+									</tr>
+								</thead>
+								<tbody md-body>
+									<tr md-row ng-repeat="item in units | filter:search;">
+										<td md-cell>{{item.name}}</td>
+										<td md-cell>{{item.phone}}</td>
+										<td md-cell>{{item.costCenter}}</td>
+										<td md-cell>{{item.city.name}}</td>
+										<td md-cell>
+											<md-menu md-offset="0 -7">
+												<md-button aria-label="Open demo menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+													<md-icon class="material-icons">more_vert</md-icon>
+												</md-button>
+												<md-menu-content width="2">
+													<md-menu-item>
+														<md-button ng-click="showModalUnity(cities, item, $index)">
+															<md-icon class="material-icons">edit</md-icon>
+															<span md-menu-align-target>EDITAR</span>
+														</md-button>
+													</md-menu-item>
+													<md-menu-item>
+														<md-button ng-click="deleteUnity($index, item.id)">
+															<md-icon class="material-icons">delete_forever</md-icon>
+															<span md-menu-align-target>DELETAR</span>
+														</md-button>
+													</md-menu-item>
+												</md-menu-content>
+											</md-menu>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</md-table-container>
+					</md-content>
+				</md-tab>
+				<md-tab label="Cidade">
+					<md-content class="md-padding">
+						<md-table-container>
+							<table md-table>
+								<thead md-head>
+									<tr md-row>
+										<th md-column><span>CIDADE</span></th>
+										<th md-column><span>SIGLA</span></th>
+										<th md-column><span>AÇÃO</span></th>
+									</tr>
+								</thead>
+								<tbody md-body>
+									<tr md-row ng-repeat="item in cities | filter:search;">
+										<td md-cell>{{item.name}}</td>
+										<td md-cell>{{item.initials}}</td>
+										<td md-cell>
+											<md-menu md-offset="0 -7">
+												<md-button aria-label="Open demo menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+													<md-icon class="material-icons">more_vert</md-icon>
+												</md-button>
+												<md-menu-content width="2">
+													<md-menu-item>
+														<md-button ng-click="showModalCity(item, $index)">
+															<md-icon class="material-icons">edit</md-icon>
+															<span md-menu-align-target>EDITAR</span>
+														</md-button>
+													</md-menu-item>
+													<md-menu-item>
+														<md-button ng-click="deleteCity($index, item.id)">
+															<md-icon class="material-icons">delete_forever</md-icon>
+															<span md-menu-align-target>DELETAR</span>
+														</md-button>
+													</md-menu-item>
+												</md-menu-content>
+											</md-menu>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</md-table-container>
+					</md-content>
+				</md-tab>
+			</md-tabs>
+		</md-content>
+	</div>
+</div>
+
+<script type="text/ng-template" id="unityModal.html">
+	<md-dialog aria-label="unityModal">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>{{title}}</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="cancel()">
+					<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-dialog-content>
+			<div class="md-dialog-content">
+				<form name="unityForm">
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='50'>
+							<label>Unidade</label>
+							<input required name="unity" ng-model="unity.name">
+							<div ng-messages="unityForm.unity.$error">
+								<div ng-message="required">Unidade é obrigatório.</div>
+							</div>
+						</md-input-container>						
+						<md-input-container class="md-block" flex='30'>
+							<label>Telefone</label>
+							<input required name="unityPhone" ng-model="unity.phone" minlength="14" ui-br-phone-number>
+							<div ng-messages="unityForm.unityPhone.$error">
+								<div ng-message="required">Telefone é obrigatório.</div>
+								<div ng-message="minlength">
+									Telefone incorreto.
+								</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='20'>
+							<label>Filial</label>
+							<input required name="branch" ng-model="unity.branch">
+							<div ng-messages="unityForm.branch.$error">
+								<div ng-message="required">Filial é obrigatório.</div>
+							</div>
+						</md-input-container>
+					</div>
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='50'>
+							<label>Centro de Custo</label>
+							<input required name="costCenter" ng-model="unity.costCenter">
+							<div ng-messages="unityForm.costCenter.$error">
+								<div ng-message="required">Centro de custo é obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container flex='50'>
+							<label>Cidades</label>
+							<md-select required name="city" ng-model="unity.city" ng-model-options="{trackBy: '$value.id'}">
+								<md-optgroup label="Cidades">
+									<md-option ng-value="item" ng-repeat="item in cities">{{item.name}}</md-option>
+								</md-optgroup>
+							</md-select>
+							<div ng-messages="unityForm.city.$error">
+								<div ng-message="required">Cidade é obrigatório.</div>
+							</div>
+						</md-input-container>
+					</div>
+				</form>
+			</div>
+		</md-dialog-content>
+		<md-dialog-actions layout="row">
+			<span flex></span>
+			<md-button ng-click="cancel()">CANCELAR</md-button>
+			<md-button ng-disabled="unityForm.$invalid" ng-click="save(unity)">CONFIRMAR</md-button>
+		</md-dialog-actions>
+	</md-dialog>
+</script>
+
+<script type="text/ng-template" id="cityModal.html">
+	<md-dialog aria-label="cityModal">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>{{title}}</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="cancel()">
+					<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-dialog-content>
+			<div class="md-dialog-content">
+				<form name="cityForm">
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='100'>
+							<label>Cidade</label>
+							<input required name="city" ng-model="city.name" ng-pattern="/^[a-zA-Z]*$/">
+							<div ng-messages="cityForm.city.$error">
+								<div ng-message="required">Cidade é obrigatório.</div>
+								<div ng-message="pattern">Cidade deve conter somente letras</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>Iniciais</label>
+							<input required minlength="2" maxlength="3" name="initials" ng-model="city.initials" ng-pattern="/^[a-zA-Z]*$/">
+							<div ng-messages="cityForm.initials.$error">
+								<div ng-message="required">Iniciais é obrigatório.</div>
+								<div ng-message="minlength">Iniciais devem ter tamanho maior que duas letras</div>
+								<div ng-message="pattern">Iniciais devem conter somente letras</div>
+							</div>
+						</md-input-container>
+						<md-input-container>
+							<label>Estado</label>
+							<md-select required name="state" ng-model="city.state" ng-model-options="{trackBy: '$value.id'}">
+								<md-optgroup label="Estados">
+									<md-option ng-value="item" ng-repeat="item in states">{{item.initials}}</md-option>
+								</md-optgroup>
+							</md-select>
+							<div ng-messages="cityForm.state.$error">
+								<div ng-message="required">Estado é obrigatório.</div>
+							</div>
+						</md-input-container>
+					</div>
+				</form>
+			</div>
+		</md-dialog-content>
+		<md-dialog-actions layout="row">
+			<span flex></span>
+			<md-button ng-click="cancel()">CANCELAR</md-button>
+			<md-button ng-disabled="cityForm.$invalid" ng-click="save(city)">CONFIRMAR</md-button>
+		</md-dialog-actions>
+	</md-dialog>
+</script>

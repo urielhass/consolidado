@@ -1,0 +1,60 @@
+<div flex="100" flex-gt-xs="100">
+	<md-toolbar>
+		<div class="md-toolbar-tools">
+			<h2 flex md-truncate>DASHBOARD</h2>
+		</div>
+	</md-toolbar>
+
+	<div layout="row" layout-wrap class="row-cards">
+		<div layout="column" flex="45" flex-xs="100">
+			<md-whiteframe class="md-whiteframe-5dp">
+				<div class="title-card-dash">
+					<span>ESTOQUE BAIXO</span>
+					<md-icon class="material-icons">call_received</md-icon>
+				</div>
+				<md-divider></md-divider>
+				<div style="max-height: 175px; overflow: auto;">
+					<md-list-item class="hover" ng-repeat="item in stockLow">
+						<p><b>{{item.cod}}</b> - {{item.name}} <i style="float: right; color: #F44336;" class="material-icons">warning</i></p>
+					</md-list-item>
+				</div>
+			</md-whiteframe>
+		</div>
+		<div layout="column" flex="45" flex-xs="100" flex-offset="5" flex-offset-xs="0">
+			<md-whiteframe class="md-whiteframe-5dp">
+				<div class="title-card-dash">
+					<span>REQUISIÇÕES PENDENTES</span>
+					<md-icon class="material-icons">assignment_late</md-icon>
+				</div>
+				<md-divider></md-divider>
+				<div style="max-height: 175px; overflow: auto;">
+					<md-list-item class="hover" ng-repeat="item in listRequest">
+						<p>{{item.stock.title}} / {{item.status | traslateStatus}} {{item.dateRequest | date:'dd/MM/yyyy HH:mm:ss' : 'UTC'}}</p>
+						<md-button class="md-secondary" ng-click="confirmRequest(item, $index)">Aprovar</md-button>
+					</md-list-item>
+				</div>
+			</md-whiteframe>
+		</div>
+	</div>
+	<div layout="row" layout-wrap class="row-cards">
+		<div layout="column" flex="45" flex-xs="100">
+			<md-whiteframe class="md-whiteframe-5dp">
+				<div>
+					<div>
+						<canvas id="myChart2"></canvas>
+					</div>
+				</div>
+			</md-whiteframe>
+		</div>
+
+		<div layout="column" flex="45" flex-xs="100" flex-offset="5" flex-offset-xs="0">
+			<md-whiteframe class="md-whiteframe-5dp">
+				<div>
+					<div>
+						<canvas id="myChart1"></canvas>
+					</div>
+				</div>
+			</md-whiteframe>
+		</div>
+	</div>
+</div>

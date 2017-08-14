@@ -1,0 +1,237 @@
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--<link rel='shortcut icon' type='image/x-icon' href='images/favicon.ico' />-->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+	<link rel="stylesheet" href="bower_components/angular-material/angular-material.min.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="bower_components/angular-material-data-table/dist/md-data-table.min.css" />
+	<link rel="stylesheet" href="css/style.css">
+	<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+		crossorigin="anonymous"></script>
+
+		<script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-route/angular-route.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-resource/angular-resource.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-animate/angular-animate.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-aria/angular-aria.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-messages/angular-messages.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-material/angular-material.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-material-data-table/dist/md-data-table.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-locale-pt-br/angular-locale_pt-br.js"></script>
+		<script type="text/javascript" src="bower_components/angular-storage/ngstorage/ngStorage.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular-input-masks/angular-input-masks-standalone.min.js"></script>
+		<script type="text/javascript" src="js/moment.js"></script>
+
+		<!-- Drag Drop -->
+		<script src="bower_components/ui-sortable-master/src/sortable.js"></script>
+		<!-- Drag Drop -->
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.min.js" type="text/javascript"></script>
+
+		<script src="app.js"></script>
+		<script src="interceptor/auth.interceptor.js"></script>
+		<script src="services/services.js"></script>
+		<script src="controller/controllers.js"></script>
+		<script src="directives/directives.js"></script>
+		<script src="filter/filters.js"></script>
+		<title>Controle estoque</title>
+</head>
+
+<body ng-app="myApp" ng-cloak>
+	<div ng-controller="IndexCtrl">
+		<md-toolbar class="fixed-menu primary-color" ng-controller="LoginCtrl">
+			<div class="md-toolbar-tools">
+				<md-button class="md-icon-button" ng-show="$localStorage.currentUser.token" aria-label="Settings" ng-click="toggleLeft()">
+					<md-icon md-font-library="material-icons">menu</md-icon>
+				</md-button>
+				<div class="logo_center" ng-click="menuClick('/dashboard')">
+					<img src="images/senai_logo.png">
+				</div>
+				<md-button ng-click="editActualUser()" class="md-icon-button" ng-show="$localStorage.currentUser.token" aria-label="Close">
+					<md-icon md-font-library="material-icons">person_outline</md-icon>
+				</md-button>
+				<md-button ng-click="logout()" class="md-icon-button" ng-show="$localStorage.currentUser.token" aria-label="Close">
+					<md-icon md-font-library="material-icons">input</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-sidenav class="md-sidenav-left" md-component-id="left">
+			<md-toolbar layout="row" layout-align="start center" class="primary-color md_toolbar_circle">
+				<div flex="15" flex-offset="5">
+					<img class="avatar" ng-src="https://cdn.auth0.com/avatars/{{Avatar}}"/>
+				</div>
+				<div flex="auto" flex-offset="5" class="box_user_mail">
+					<div>{{actualUser.name}}</div>
+					<div>{{actualUser.email}}</div>
+				</div>
+			</md-toolbar>
+			<md-content layout-margin class="style-sidnav">
+				<md-list ng-cloak>
+					<md-list-item ng-repeat="item in items">
+						<div ng-click="menuClick(item.link)" md-autofocus="$index == 2" class="md-list-item-content">
+							<md-icon md-font-library="material-icons">{{item.icon}}</md-icon>
+							<span class="md-inline-list-icon-label">{{item.name}}</span>
+						</div>
+					</md-list-item>
+				</md-list>
+			</md-content>
+		</md-sidenav>
+		<div id="main" flex="90" flex-offset="5" flex-offset-xs="0" flex-xs="100" class="content">
+			<div ng-view></div>
+		</div>
+		<div ng-controller="ButtomFlyCtrl as buttomFly" ng-show="$localStorage.currentUser.token">
+			<md-fab-speed-dial ng-hide="buttomFly.hidden" md-direction="up" md-open="buttomFly.isOpen" class="md-scale md-fab-top-right"
+				ng-class="{ 'md-hover-full': demo.hover }" ng-mouseenter="buttomFly.isOpen=true" ng-mouseleave="buttomFly.isOpen=false">
+				<md-fab-trigger>
+					<md-button class="md-fab button_fly">
+						<md-tooltip md-direction="botton">Menu</md-tooltip>
+						<md-icon class="material-icons">menu</md-icon>
+					</md-button>
+				</md-fab-trigger>
+
+				<md-fab-actions>
+					<div ng-repeat="item in buttomFly.items">
+						<md-button aria-label="{{item.name}}" class="md-fab md-raised md-mini" ng-click="menuClick(item.href)">
+							<md-tooltip md-direction="{{item.direction}}" md-autohide="false">
+								{{item.name}}
+							</md-tooltip>
+
+							<md-icon class="material-icons">{{item.icon}}</md-icon>
+						</md-button>
+					</div>
+				</md-fab-actions>
+				</md-fab-speed-dial>
+		</div>
+		<footer class="footer">
+			<p style="color: #fff; text-align: left;">
+				<strong>Turma de Análise e Desenvolvimento de Sistemas - SENAI 2015 - </strong> 
+				<a href="mailto:kadu.artur@gmail.com">Kadu Artur Prussek</a>, 
+				<a href="mailto:andre.luchtenberg">André Luchtenberg</a>, 
+				<a href="mailto:bschiochet@gmail.com">Bruno Rogério Schiochet</a>, 
+				<a href="mailto:hass.uriel@gmail.com">Uriel Hass</a>.	
+			</p>
+		</footer>
+		<script type="text/ng-template" id="userModalActual.html">
+
+			<md-dialog aria-label="User Modal">
+				<md-toolbar class="primary-color">
+					<div class="md-toolbar-tools">
+						<md-icon flex="5" class="material-icons">edit</md-icon>
+						<h2>{{title}}</h2>
+						<span flex></span>
+						<md-button class="md-icon-button" ng-click="cancel()">
+							<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+						</md-button>
+					</div>
+				</md-toolbar>
+				<md-dialog-content style="min-width:950px; max-width:950px;">
+					<div class="md-dialog-content">
+						<form name="userForm">
+							<div layout-gt-sm="row">
+								<md-input-container class="md-block" flex='100'>
+									<label>Nome</label>
+									<input required name="userName" ng-model="user.name">
+									<div ng-messages="userForm.userName.$error">
+										<div ng-message="required">Nome é obrigatório.</div>
+									</div>
+								</md-input-container>
+								<md-input-container class="md-block" flex='100'>
+									<label>Telefone</label>
+									<input required name="userPhone" ng-model="user.phone" minlength="8" maxlength="13" ng-pattern="/^[0-9]+$/">
+									<div ng-messages="userForm.userPhone.$error">
+										<div ng-message="required">Telefone é obrigatório.</div>
+										<div ng-message-exp="['minlength', 'maxlength', 'pattern']">
+											Telefone incorreto.
+										</div>
+									</div>
+								</md-input-container>
+							</div>
+							<div layout-gt-sm="row">
+								<md-input-container class="md-block" flex='100'>
+									<label>Email</label>
+									<input required name="userEmail" ng-model="user.email" minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/">
+									<div ng-messages="userForm.userEmail.$error">
+										<div ng-message-exp="['required', minlength, 'maxlength', 'pattern']">
+											Email incorreto.
+										</div>
+									</div>
+								</md-input-container>
+								<md-input-container class="md-block" flex='100'>
+									<label>Repita seu email</label>
+									<input required compare-to="user.email" name="CompareEmail" ng-model="CompareEmail">
+									<div ng-messages="userForm.CompareEmail.$error">
+										<div ng-message="required">Repetir o email é obrigatório.</div>
+										<div ng-message="compareTo">Email não coincidem.</div>
+									</div>
+								</md-input-container>
+							</div>
+							<div layout-gt-sm="row">
+								<md-input-container class="md-block" flex='100'>
+									<label>Senha</label>
+									<input required name="userPassword" ng-model="user.password" type="password">
+									<div ng-messages="userForm.userPassword.$error">
+										<div ng-message="required">Senha é obrigatória.</div>
+									</div>
+								</md-input-container>
+								<md-input-container class="md-block" flex='100'>
+									<label>Repita sua senha</label>
+									<input required compare-to="user.password" name="ComparePassword" ng-model="ComparePassword" type="password">
+									<div ng-messages="userForm.ComparePassword.$error">
+										<div ng-message="required">Repetir a senha é obrigatório.</div>
+										<div ng-message="compareTo">Senhas não coincidem.</div>
+									</div>
+								</md-input-container>
+							</div>
+							<div layout="row">
+								<md-input-container flex="100">
+									<label>Unidades usário</label>
+									<md-select ng-model="unit" ng-change="addUnityToUser(unit)">
+										<md-optgroup label="Unidades">
+											<md-option ng-value="item" ng-repeat="item in units | orderBy: 'name'">{{item.name}}</md-option>
+										</md-optgroup>
+									</md-select>
+								</md-input-container>
+							</div>
+							<div layout="row" layout-wrap>
+								<md-whiteframe class="md-whiteframe-1dp card-user" flex="50" ng-repeat="item in user.units">
+									<span class="md-headline" flex="auto">{{item.name}}</span>
+									<span class="card-user-city" flex="auto">{{item.city.name}}</span>
+									<span flex></span>
+									<md-button class="md-icon-button" ng-click="deleteUnity($index, item)">
+										<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+									</md-button>
+								</md-whiteframe>
+							</div>
+							<div layout-gt-sm="row">
+								<md-switch ng-model="user.status" aria-label="activeUser">
+									Usuário ativo
+								</md-switch>
+								<md-switch ng-if="permission == 30" ng-model="user.adm" aria-label="activeUser">
+									Administrador
+								</md-switch>
+							</div>
+						</form>
+					</div>
+				</md-dialog-content>
+
+				<md-dialog-actions layout="row">
+					<span flex></span>
+					<md-button ng-click="cancel()">
+						CANCELAR
+					</md-button>
+					<md-button ng-disabled="userForm.$invalid || user.units == undefined || user.units.length <= 0;" ng-click="save()">
+						CONFIRMAR
+					</md-button>
+				</md-dialog-actions>
+			</md-dialog>
+		</script>
+	</div>
+
+</body>
+
+</html>

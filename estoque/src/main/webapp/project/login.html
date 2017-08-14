@@ -1,0 +1,36 @@
+<link rel="stylesheet" type="text/css" href="css/login.css">
+<div  ng-controller="LoginCtrl"  layout="column" layout-align="center center" layout-fill>
+	<div  class="loginBox md-whiteframe-z1" layout="column">
+		<md-toolbar layout="row">
+			<div class="md-toolbar-tools primary-color login_title">
+				<h2>Login</h2>
+			</div>
+		</md-toolbar>
+		<md-content class="md-padding" layout="column">
+			<form name="loginForm">
+				<md-input-container class="md-icon-float md-block">
+			      <label>Email</label>
+			      <md-icon md-font-library="material-icons">perm_identity</md-icon>
+						<input ng-model="user.email" name="email" required>
+						<div ng-messages="loginForm.email.$error">
+							<div ng-message="required">Digite seu email.</div>
+						</div>
+			    </md-input-container>
+
+				<md-input-container class="md-icon-float md-block">
+			      <label>Senha</label>
+			      <md-icon md-font-library="material-icons">lock_outline</md-icon>
+					<input type="password" ng-model="user.password" required name="password">
+					<div ng-messages="loginForm.password.$error">
+						<div ng-message="required">Digite sua senha.</div>
+					</div>
+				</md-input-container>
+				<div layout="row" layout-align="end end" >
+					<md-button class="md-raised button_login" ng-disable="loginForm.$invalid" ng-click="login($event, user)">
+						Fazer login
+					</md-button>
+				</div>
+			</form>
+		</md-content>
+	</div>
+</div>

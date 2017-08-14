@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		
+		<link rel="stylesheet" href="../bower_components/angular-gridster/dist/angular-gridster.min.css"/>
+		
+		<script type="text/javascript" src="../bower_components/angular/angular.min.js"></script>
+		<script type="text/javascript" src="../bower_components/angular-gridster/dist/angular-gridster.min.js"></script>
+		
+		<script type="text/javascript" src="js/script.js"></script>
+		
+		<title>Teste de grid</title>
+		
+		<style>
+			.stock_location{}
+			.stock_location_item{}
+		</style>
+	</head>
+	<body ng-app="grid" ng-controller="gridController as ctrl">
+		<div gridster="ctrl.gridsterOpts">
+		    <ul class="stock_location">
+		        <li class="stock_location_item" style="border: solid 1px;" gridster-item="item" ng-repeat="item in ctrl.standardItems">
+		          <div class="ddd" style="width: 100%; background: #ddd; padding: 10px 0px">Handle</div>
+		            dfgkjsdhfgkjh
+		        </li>
+		    </ul>
+		</div>
+	</body>
+</html>

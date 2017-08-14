@@ -1,0 +1,191 @@
+<div>
+	<md-toolbar class="md-table-toolbar md-default">
+		<div class="md-toolbar-tools">
+			<span>USUÁRIOS</span>
+			<span flex></span>
+			<div ng-show="showSearch" flex="auto">
+				<md-button style="float: right;" class="md-icon-button" aria-label="Search" ng-click="showSearch = false; search = '';">
+					<md-icon class="whitet">close</md-icon>
+				</md-button>
+				<input class="input-search" ng-model="search" placeholder="Pesquisar...">
+			</div>
+			<div ng-show="!showSearch">
+				<md-button ng-click="userModal($event)" class="md-raised" aria-label="Favorite">ADICIONAR</md-button>
+				<md-button class="md-icon-button" aria-label="Search" ng-click="showSearch = true">
+					<md-icon class="whitet">search</md-icon>
+				</md-button>
+			</div>
+		</div>
+	</md-toolbar>
+	<md-table-container>
+		<table md-table  multiple>
+			<thead md-head>
+				<tr md-row>
+					<th md-column><span>NOME</span></th>
+					<th md-column><span>TELEFONE</span></th>
+					<th md-column><span>EMAIL</span></th>
+					<th md-column><span>ADMINISTRADOR</span></th>
+					<th md-column><span>STATUS</span></th>
+					<th md-column><span>AÇÕES</span></th>
+				</tr>
+			</thead>
+			<tbody md-body>
+				<tr md-row ng-repeat="user in users | filter: search;">
+					<td md-cell>{{user.name}}</td>
+					<td md-cell>{{user.phone}}</td>
+					<td md-cell>{{user.email}}</td>
+					<td md-cell>
+						<span ng-if="user.adm">Sim</span>
+						<span ng-if="!user.adm">Não</span>
+					</td>
+					<td md-cell>
+						<div ng-class="{'status_off': !user.status, 'status_on': user.status}"></div>
+					</td>
+					<td md-cell>
+						<md-menu md-offset="0 -7">
+							<md-button aria-label="Open demo menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+								<md-icon class="material-icons">more_vert</md-icon>
+							</md-button>
+							<md-menu-content width="2">
+								<md-menu-item>
+									<md-button ng-click="userModal($index, user)">
+										<md-icon class="material-icons">edit</md-icon>
+										<span md-menu-align-target>EDITAR</span>
+									</md-button>
+								</md-menu-item>
+								<md-menu-item>
+									<md-button ng-click="deleteUser($index, user.id)">
+										<md-icon class="material-icons">delete_forever</md-icon>
+										<span md-menu-align-target>DELETAR</span>
+									</md-button>
+								</md-menu-item>
+							</md-menu-content>
+						</md-menu>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</md-table-container>
+</div>
+
+<script type="text/ng-template" id="userModal.html">
+
+	<md-dialog aria-label="User Modal">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<md-icon flex="5" class="material-icons">edit</md-icon>
+				<h2>{{title}}</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="cancel()">
+					<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-dialog-content  style="min-width:950px; max-width:950px;">
+			<div class="md-dialog-content">
+				<form name="userForm">
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='100'>
+							<label>Nome</label>
+							<input required name="userName" ng-model="user.name">
+							<div ng-messages="userForm.userName.$error">
+								<div ng-message="required">Nome obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>Telefone</label>
+							<input required name="userPhone" ng-model="user.phone" minlength="14" ui-br-phone-number>
+							<div ng-messages="userForm.userPhone.$error">
+								<div ng-message="required">Telefone obrigatório.</div>
+								<div ng-message="minlength">
+									Telefone incorreto.
+								</div>
+							</div>
+						</md-input-container>
+					</div>
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='100'>
+							<label>Email</label>
+							<input required name="userEmail" ng-model="user.email"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/">
+							<div ng-messages="userForm.userEmail.$error">
+								<div ng-message-exp="['required', minlength, 'maxlength', 'pattern']">
+									Email incorreto.
+								</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>Repita seu email</label>
+							<input required compare-to="user.email" name="CompareEmail" ng-model="CompareEmail">
+							<div ng-messages="userForm.CompareEmail.$error">
+								<div ng-message="required">Repetir o email obrigatório.</div>
+								<div ng-message="compareTo">Emails não coincidem.</div>
+							</div>
+						</md-input-container>
+					</div>
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='100'>
+							<label ng-style="showError && {'color': 'rgb(221,44,0)'}">Senha</label>
+							<input ng-style="showError && {'border-color': 'rgb(221,44,0)'}" name="userPassword" ng-model="user.password" type="password" ng-blur="validPasswordMessage()">
+							<div ng-messages="userForm.ComparePassword.$error">
+								<div ng-class="{ 'error-message': showError }" ng-show="showError">Senha é obrigatória</div>
+							</div>							
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>Repita sua senha</label>
+							<input compare-to="user.password"  name="ComparePassword" ng-model="ComparePassword" type="password">
+							<div ng-messages="userForm.ComparePassword.$error">
+								<div ng-message="compareTo">Senhas não coincidem.</div>
+							</div>
+						</md-input-container>
+					</div>
+					<div layout="row">
+						<md-input-container flex="100">
+							<label>Unidades usuário</label>
+							<md-select ng-model="unit" ng-change="addUnityToUser(unit)" ng-if="adm.isAdm">
+								<md-optgroup label="Unidades">
+									<md-option ng-value="item" ng-repeat="item in units | orderBy: 'name'">{{item.name}}</md-option>
+								</md-optgroup>
+							</md-select>
+						</md-input-container>
+					</div>
+					<div layout="row" layout-wrap>
+						<md-whiteframe class="md-whiteframe-1dp card-user" flex="50" ng-repeat="item in user.units">
+							<span class="md-headline" flex="auto">{{item.name}}</span>
+							<span class="card-user-city" flex="auto">{{item.city.name}}</span>
+							<span flex></span>
+							<md-button class="md-icon-button" ng-click="deleteUnity($index, item)">
+								<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+							</md-button>
+						</md-whiteframe>
+					</div>
+					<div layout-gt-sm="row">
+						<md-input-container flex="100">
+							<label>Permissões</label>
+							<md-select ng-model="user.permission">
+								<md-option value="10">Requisição</md-option>
+								<md-option value="20">Estoque</md-option>
+								<md-option ng-if="adm.isAdm" value="30">Aprovar requisição</md-option>
+							</md-select>
+						</md-input>
+						<md-switch ng-model="user.status" aria-label="activeUser">
+							Usuário ativo
+						</md-switch>
+						<md-switch ng-model="user.adm" aria-label="activeUser" ng-if="adm.isAdm">
+							Administrador
+						</md-switch>
+					</div>
+				</form>
+			</div>
+		</md-dialog-content>
+
+		<md-dialog-actions layout="row">
+			<span flex></span>
+			<md-button ng-click="cancel()">
+				CANCELAR
+			</md-button>
+			<md-button ng-disabled="userForm.$invalid || user.units == undefined || user.units.length <= 0 || validPassword()" ng-click="save()">
+				CONFIRMAR
+			</md-button>
+		</md-dialog-actions>
+	</md-dialog>
+</script>

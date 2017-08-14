@@ -1,0 +1,23 @@
+{
+  "name": "consolidado",
+  "description": "Projeto consolidado - Controle de Estoque",
+  "main": "index",
+  "authors": [
+    "Uriel - Xexeu - Kadu - André"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.0",
+    "angular": "^1.5.8",
+    "normalize-css": "normalize.css#^4.2.0",
+    "angular-material": "^1.1.0"
+  }
+}

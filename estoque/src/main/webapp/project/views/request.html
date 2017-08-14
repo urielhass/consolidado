@@ -1,0 +1,232 @@
+<div ng-controller="RequestCtrl">
+	<md-toolbar class="md-table-toolbar md-default">
+		<div class="md-toolbar-tools">
+			<span>REQUISIÇÃO</span>
+			<span flex></span>
+			<div ng-show="showSearch" flex="auto">
+				<md-button style="float: right;" class="md-icon-button" aria-label="Search" ng-click="showSearch = false; search = '';">
+					<md-icon class="whitet">close</md-icon>
+				</md-button>
+				<input class="input-search" ng-model="search" placeholder="Pesquisar...">
+			</div>
+			<div ng-show="!showSearch">
+				<md-button ng-click="toRequest($event)" class="md-raised" aria-label="Favorite">REQUISITAR</md-button>
+				<md-button class="md-icon-button" aria-label="Search" ng-click="showSearch = true">
+					<md-icon class="whitet">search</md-icon>
+				</md-button>
+			</div>
+		</div>
+	</md-toolbar>
+	<md-table-container style="overflow: auto;max-height: 300px;">
+		<table md-table multiple>
+			<thead md-head>
+				<tr md-row>
+					<th md-column><span>ID<span></th>
+					<th md-column><span>ESTOQUE</span></th>
+					<th md-column><span>FILIAL</span></th>
+					<th md-column><span>STATUS</span></th>
+					<th md-column><span>DATA REQ.</span></th>
+					<th md-column><span>REQ. POR</span></th>
+					<th md-column><span>AÇÃO</span></th>
+				</tr>
+			</thead>
+			<tbody md-body>
+				<tr md-row ng-repeat="item in listRequest | filter:search;">
+					<td md-cell>{{item.id}}</td>
+					<td md-cell>
+						<md-button class="md-icon-button" ng-click="viewStock(item.id);" title="VISUALIZAR O ESTOQUE" aria-label="deleteUser">
+							<md-icon class="material-icons">visibility</md-icon>
+						</md-button>
+					</td>
+					<td md-cell>{{item.branch}}</td>
+					<td md-cell>{{item.status | traslateStatus}}</td>
+					<td md-cell>{{item.dateRequest | date:'dd/MM/yyyy' : 'UTC'}}</td>
+					<td md-cell>{{item.user.name}}</td>
+					<td md-cell>
+						<md-menu ng-if="item.user.email == emailUser && item.status != 50" md-offset="0 -7">
+							<md-button aria-label="Open demo menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+								<md-icon class="material-icons">more_vert</md-icon>
+							</md-button>
+							<md-menu-content width="2">
+								<md-menu-item>
+									<md-button ng-click="remove(item,$index)">
+										<md-icon class="material-icons">delete_forever</md-icon>
+										<span md-menu-align-target>CANCELAR</span>
+									</md-button>
+								</md-menu-item>
+							</md-menu-content>
+						</md-menu>
+						<md-button class="md-icon-button" ng-if="item.user.email == emailUser && item.status == 50" ng-click="confirm(item.id, $index)">
+							<md-icon class="material-icons">check</md-icon>
+						</md-button>
+					</td>
+				</tr>
+				<tr md-row ng-show="!(listRequest| filter:search).length">
+					<td colspan="7" md-cell>Nenhuma requisição encontrada</td>
+				</tr>
+			</tbody>
+		</table>
+	</md-table-container>
+</div>
+
+<script type="text/ng-template" id="requestViewModal.html">
+	<md-dialog aria-label="RequestModal" style="width: 50%;">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>INFORMAÇÕES DA REQUISIÇÃO</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="ctrl.cancel()">
+					<md-icon class="material-icons">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-dialog-content ng-cloak>
+			<div class="md-dialog-content" ng-repeat="item in ctrl.listStock">
+				<p><strong>Título: </strong> {{item.stock.title}}</p>
+				<p><strong>Quantidade: </strong> {{item.quantity}}</p>
+				<p><strong>Valor unitário: </strong> R$ {{item.stock.unitaryValue}}</p>
+				<p><strong>Valor total do item: </strong> R$ {{item.stock.unitaryValue * item.quantity}}</p>
+			</div>
+			<div class="md-dialog-content">
+				<p><strong>Quantidade total: </strong> {{ctrl.total}}</p>
+				<p><strong>Valor total: </strong> R$ {{ctrl.totalValue}}</p>
+			</div>
+		</md-dialog-content>
+	</md-dialog>
+</script>
+
+<script type="text/ng-template" id="requestModal.html">
+	<md-dialog aria-label="RequestModal" style="min-width: 900px;">
+
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>REQUISIÇÃO</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="ctrl.cancel()">
+					<md-icon class="material-icons">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+
+		<form name="CadRequestForm">
+			<md-dialog-content ng-cloak>
+				<div class="md-dialog-content">
+					<div layout="column">
+						<p>Dados RequisiÃ§Ã£o</p>
+						<div layout="row">
+							<md-input-container class="md-icon-float md-block" flex="33">
+								<label>CR</label>
+								<input name="costCenter" ng-model="costCenter" type="number" required>
+							</md-input-container>
+							<md-input-container class="md-icon-float md-block" flex="33">
+								<label>Projeto</label>
+								<input name="project" ng-model="project" type="number" required>
+							</md-input-container>
+							<md-input-container class="md-icon-float md-block" flex="33">
+								<label>Data de entrega</label>
+								<md-datepicker ng-model="scheduleDate" md-placeholder="Enter date" md-open-on-focus></md-datepicker>
+							</md-input-container>
+						</div>
+						<div layout="row">
+							<md-select name="branch" ng-model="branch" required flex="25" placeholder="FILIAL">
+                				<md-optgroup label="FILIAL">
+                  					<md-option ng-value="item.branch" ng-repeat="item in listUnitsAvaible">{{item.name}}</md-option>
+                				</md-optgroup>
+              				</md-select>					
+						</div>
+
+						<div layout="row">
+							<label>Filtro</label>
+							<md-input-container flex="50">
+								<md-select name="category" ng-model="categorySelected" required flex="85" placeholder="Categoria" ng-change="getSubCategorys(categorySelected, ctrl.searchText, categorySelected.name)">
+                					<md-option ng-value="">SELECIONE</md-option>
+									<md-option ng-value="item" ng-repeat="item in categorys">{{item.name}}</md-option>
+              					</md-select>
+							</md-input-container>
+							<!-- ng-change="ctrl.filterRequestStock(ctrl.searchText, categorySelected.name, subCategorySelected.name)" -->
+							<md-input-container flex="50">
+								<md-select name="subCategory" ng-model="subCategorySelected" required flex="85" placeholder="Sub Categoria">
+                					<md-optgroup label="Sub Categoria">
+										<md-option ng-value="">SELECIONE</md-option>
+                  						<md-option ng-value="item" ng-repeat="item in subCategorys">{{item.name}}</md-option>
+                					</md-optgroup>
+              				</md-select>
+							<!--<div ng-messages="CadRequestForm.subCategory.$error">
+								<div ng-message="required">Ao Selecionar uma categoria, a subcategoria deve ser preenchida.</div>
+							</div>-->
+							</md-input-container>	
+						</div>
+						<!-- div layout="row">
+							<md-input-container class="md-icon-float md-block" flex="33">
+								<label>Nota fiscal</label>
+								<input name="invoiceTx" ng-model="invoice" type="number" required>
+							</md-input-container>
+							<md-input-container class="md-icon-float md-block" flex="33">
+								<label>Responsavel da nota fiscal</label>
+								<input name="invoiceNameTx" ng-model="invoiceName" type="text" required>
+							</md-input-container>
+							<md-input-container class="md-icon-float md-block" flex="33">
+								<label>Documento contábil</label>
+								<input name="invoiceTx" ng-model="accountingDocument" type="number" required>
+							</md-input-container>
+						</div-->
+					</div>
+
+
+					<!-- TODO ctrl.querySearch(ctrl.searchText, subCategorySelected.name, categorySelected.name) -->
+					<form ng-submit="$event.preventDefault()">
+						<p>Selecione o produto para Requisitar.</p>
+						<md-autocomplete style="margin: 8px;" 
+						md-no-cache
+						md-selected-item="ctrl.selectedItem" 
+						md-search-text="ctrl.searchText" 
+						md-items="item in ctrl.querySearch(ctrl.searchText, categorySelected, subCategorySelected)"
+						 md-item-text="item.title" 
+						 md-min-length="0"  
+						md-model="seearchText" 
+						 placeholder="Selecione o estoque a ser requisitado:" 
+						 md-selected-item-change="ctrl.add(item)"
+						 md-autofocus>
+							<md-item-template>
+								<span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.subCategory.category.description}} - {{item.subCategory.description}} - {{item.title}} Quantidade: {{item.quantity}}</span>
+							</md-item-template>
+							<md-not-found>
+								Nenhum livro com o nome "{{ctrl.searchText}}" foi encontrado.
+							</md-not-found>
+						</md-autocomplete>
+					</form>
+
+					<div layout="column">
+						<md-card ng-repeat="item in requestsProduct" class="item_stock_request">
+							<md-card-title>
+								<md-card-title-text flex="95">
+									<span class="md-headline">{{item.stock.title}}</span>
+								</md-card-title-text>
+								<div flex="5" class="close-card">
+									<md-button class="md-icon-button" aria-label="delete product" ng-click="deleteProduct($index)">
+										<md-icon class="material-icons">close</md-icon>
+									</md-button>
+								</div>
+							</md-card-title>
+							<div layout="row">
+								<md-input-container class="md-icon-float md-block" flex="35">
+									<input name="quantity" ng-model="item.quantity" type="number" required placeholder="Quantidade">
+									<div ng-messages="CadRequestForm.quantity.$error">
+										<div ng-message="required">Informe uma quantidade.</div>
+									</div>
+								</md-input-container>
+							</div>
+						</md-card>
+						<br>
+					</div>
+				</div>
+			</md-dialog-content>
+
+			<md-dialog-actions>
+				<md-button aria-label="Finished" ng-click="ctrl.cancel($event)">CANCELAR</md-button>
+				<md-button aria-label="Finished" ng-disabled="CadRequestForm.$invalid || requestsProduct.length <= 0" ng-click="ctrl.finish($event,requestsProduct, scheduleDate, costCenter, project, branch)">CONFIRMAR</md-button>
+			</md-dialog-actions>
+		</form>
+	</md-dialog>
+
+</script>

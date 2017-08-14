@@ -1,0 +1,404 @@
+<meta charset="UTF-8">
+<div>
+	<md-toolbar class="md-table-toolbar md-default">
+		<div class="md-toolbar-tools">
+			<span>ESTOQUE</span>
+			<span flex></span>
+
+			<div ng-show="showSearch" layout="row">
+				<input class="input-search" ng-model="search" placeholder="Pesquisar...">
+				<select name="singleSelect" ng-model="categoryFilter" class="input-search" ng-change="getSubCategory(categoryFilter)">
+					<option value="" style="color: #9E9E9E;">Categoria</option>
+					<option ng-repeat="data in category" ng-value="data.name">{{data.name}}</option>
+				</select>
+				<select name="singleSelect" ng-model="subCategoryFilter" class="input-search">
+					<option value="" style="color: #9E9E9E;">Sub-Categoria</option>
+					<option ng-repeat="data in subCategory" ng-value="data.name">{{data.name}}</option>
+				</select>
+				<md-button class="md-icon-button" aria-label="Search" ng-click="showSearch = false; search = ''; categoryFilter = ''; subCategoryFilter = '';">
+					<md-icon class="whitet">close</md-icon>
+				</md-button>
+			</div>
+
+			<div ng-show="!showSearch">
+				<md-button class="md-raised" ng-click="showEdit()" aria-label="Favorite">ADICIONAR</md-button>
+				<md-button class="md-icon-button" aria-label="Search" ng-click="showSearch = true">
+					<md-icon class="whitet">search</md-icon>
+				</md-button>
+			</div>
+		</div>
+	</md-toolbar>
+	<!-- exact table from live demo -->
+	<md-table-container>
+		<table md-table multiple>
+			<thead md-head>
+				<tr md-row>
+					<th md-column><span>CÓD.</span></th>
+					<th md-column><span>TÍTULO</span></th>
+					<th md-column><span>CATEGORIA</span></th>
+					<th md-column><span>SUB-CATEGORIA</span></th>
+					<th md-column><span>LOCALIZAÇÃO</span></th>
+					<th md-column><span>NOTA FISCAL</span></th>
+					<th md-column><span>TOTAL</span></th>
+					<th md-column><span>VALOR UNI.</span></th>
+					<th md-column><span>AÇÕES</span></th>
+				</tr>
+			</thead>
+			<tbody md-body>
+				<tr md-row ng-repeat="item in listStock | filter: search | filter: categoryFilter | filter: subCategoryFilter">
+					<td md-cell>{{item.cod}}</td>
+					<td md-cell>{{item.title}}</td>
+					<td md-cell>{{item.category}}</td>
+					<td md-cell>{{item.subCategory}}</td>
+					<td md-cell>
+						<md-button class="md-icon-button" title="VISUALIZAR LOCALIZAÇÃO" ng-click="show(item.id);" aria-label="deleteUser">
+							<md-icon class="material-icons">visibility</md-icon>
+						</md-button>
+					</td>
+					<td md-cell>{{item.invoice}}</td>
+					<td md-cell>{{item.quantity}}</td>
+					<td md-cell>R$ {{item.unitaryValue | number:2}}</td>
+					<td md-cell>
+						<md-menu md-offset="0 -7">
+							<md-button aria-label="Open demo menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+								<md-icon class="material-icons">more_vert</md-icon>
+							</md-button>
+							<md-menu-content width="2">
+								<md-menu-item>
+									<md-button ng-click="showEdit(item,$index)">
+										<md-icon class="material-icons">edit</md-icon>
+										<span md-menu-align-target>EDITAR</span>
+									</md-button>
+								</md-menu-item>
+								<md-menu-item>
+									<md-button ng-click="removeStock(item.id,$index)">
+										<md-icon class="material-icons">delete_forever</md-icon>
+										<span md-menu-align-target>DELETAR</span>
+									</md-button>
+								</md-menu-item>
+							</md-menu-content>
+						</md-menu>
+					</td>
+				</tr>
+				<tr md-row ng-show="!(listStock| filter:search).length">
+					<td colspan="9" md-cell>Nenhum estoque encontrado.</td>
+				</tr>
+			</tbody>
+		</table>
+	</md-table-container>
+</div>
+
+<script type="text/ng-template" id="category.html">
+	<md-dialog aria-label="modalEdit">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>{{title}}</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="cancel()">
+					<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+
+		<md-dialog-content>
+			<div class="md-dialog-content" style="min-width:950px;">
+				<form name="categoryForm">
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='100'>
+							<label>Nome</label>
+							<input required name="name" ng-model="category.name">
+							<div ng-messages="categoryForm.name.$error">
+								<div ng-message="required">Categoria Ã© obrigatÃ³rio.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>DescriÃ§Ã£o</label>
+							<input required name="description" ng-model="category.description">
+							<div ng-messages="categoryForm.description.$error">
+								<div ng-message="required">DescriÃ§Ã£o da categoria Ã© obrigatÃ³rio.</div>
+							</div>
+						</md-input-container>
+					</div>
+				</form>
+			</div>
+		</md-dialog-content>
+
+		<md-dialog-actions layout="row">
+			<span flex></span>
+			<md-button ng-click="cancel()">
+				CANCELAR
+			</md-button>
+			<md-button ng-disabled="categoryForm.$invalid" ng-click="save(category)">
+				CONFIRMAR
+			</md-button>
+		</md-dialog-actions>
+	</md-dialog>
+</script>
+
+
+<script type="text/ng-template" id="subCategory.html">
+	<md-dialog aria-label="modalEdit">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>{{title}}</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="cancel()">
+					<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+
+		<md-dialog-content>
+			<div class="md-dialog-content" style="min-width:950px;">
+				<form name="subCategoryForm">
+					<div layout-gt-sm="row">
+						<md-input-container>
+							<label>Categorias</label>
+							<md-select name="category" ng-model="subCategory.category" ng-model-options="{trackBy: '$value.id'}" required>
+								<md-optgroup label="Categorias">
+									<md-option ng-value="item" ng-repeat="item in categorys">{{item.name}}</md-option>
+								</md-optgroup>
+							</md-select>
+							<div ng-messages="subCategoryForm.category.$error">
+								<div ng-message="required">Categoria Ã© obrigatÃ³rio.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>Nome</label>
+							<input required name="name" ng-model="subCategory.name">
+							<div ng-messages="subCategoryForm.name.$error">
+								<div ng-message="required">Sub-categoria Ã© obrigatÃ³rio.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>DescriÃ§Ã£o</label>
+							<input required name="description" ng-model="subCategory.description">
+							<div ng-messages="subCategoryForm.description.$error">
+								<div ng-message="required">DescriÃ§Ã£o da sub-categoria Ã© obrigatÃ³rio.</div>
+							</div>
+						</md-input-container>
+					</div>
+				</form>
+			</div>
+		</md-dialog-content>
+
+		<md-dialog-actions layout="row">
+			<span flex></span>
+			<md-button ng-click="cancel()">
+				Cancelar
+			</md-button>
+			<md-button ng-disabled="subCategoryForm.$invalid" ng-click="save(subCategory)">
+				Confirmar
+			</md-button>
+		</md-dialog-actions>
+	</md-dialog>
+
+
+</script>
+
+<script type="text/ng-template" id="localModal.html">
+
+	<md-dialog aria-label="modalLocal">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<md-icon flex="10" class="material-icons">visibility</md-icon>
+				<h2>LOCALIZAÇÃO DA UNIDADE</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="cancelModal()">
+					<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-dialog-content>
+			<div class="md-dialog-content" ng-repeat="item in itemPlace.listLocation">
+				<p><strong>Container: </strong> {{item.container.name}}</p>
+				<p><strong>Posicao: </strong> {{item.position}}</p>
+				<p><strong>Quantidade: </strong> {{item.quantity}}</p>
+			</div>
+		</md-dialog-content>
+		<md-dialog-actions layout="row">
+			<span flex></span>
+			<md-button ng-click="cancelModal()">CONFIRMAR</md-button>
+		</md-dialog-actions>
+
+	</md-dialog>
+
+
+</script>
+
+<script type="text/ng-template" id="openModal.html">
+
+	<md-dialog aria-label="modalEdit">
+		<form name="stockForm">
+			<md-toolbar class="primary-color">
+				<div class="md-toolbar-tools">
+					<h2>NOVO / EDITAR</h2>
+					<span flex></span>
+					<md-button class="md-icon-button" ng-click="cancel()">
+						<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+					</md-button>
+				</div>
+			</md-toolbar>
+			<md-dialog-content>
+				<div class="md-dialog-content" style="min-width:950px; max-width:950px;">
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='25'>
+							<label>Código</label>
+							<input ng-model="stock.cod" name="stockCod" required>
+							<div ng-messages="stockForm.stockCod.$error">
+								<div ng-message="required">Código obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='25'>
+							<label>Título</label>
+							<input ng-model="stock.title" type="text" name="stockTitle" required>
+							<div ng-messages="stockForm.stockTitle.$error">
+								<div ng-message="required">Título obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='25'>
+							<label>CPA</label>
+							<input ng-model="stock.cpa" type="number" name="stockCpa" required>
+							<div ng-messages="stockForm.stockCpa.$error">
+								<div ng-message="required">Título obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='25'>
+							<label>Grafica</label>
+							<input ng-model="stock.printShop" type="text" name="stockPrintShop" required>
+							<div ng-messages="stockForm.stockPrintShop.$error">
+								<div ng-message="required">Título obrigatório.</div>
+							</div>
+						</md-input-container>
+					</div>
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='60'>
+							<label>Nome</label>
+							<input ng-model="stock.name" type="text" name="stockName" required>
+							<div ng-messages="stockForm.stockName.$error">
+								<div ng-message="required">Nome obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='30'>
+							<label>Categoria</label>
+							<md-select name="category" required ng-model="stock.subCategory.category.id" ng-change="getSubCategory(stock.subCategory.category.id);">
+								<md-option ng-repeat='category in listCategory' ng-value="category.id">{{category.name}}</md-option>
+							</md-select>
+							<div ng-messages="stockForm.category.$error">
+								<div ng-message="required">Categoria é obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='30'>
+							<label>Sub Categoria</label>
+							<md-select ng-model="stock.subCategory.id">
+								<md-option ng-repeat='SubCategory in listSubCategory' ng-value="{{SubCategory.id}}">{{SubCategory.name}}</md-option>
+							</md-select>
+						</md-input-container>
+					</div>
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='65'>
+							<label>Descrição</label>
+							<input ng-model="stock.description" type="text" name="stockDescription">
+							<!--<div ng-messages="stockForm.stockDescription.$error">
+								<div ng-message="required">Descrição obrigatória</div>
+							</div>-->
+						</md-input-container>
+						<md-input-container class="md-block" flex='20'>
+							<label>Valor</label>
+							<input ng-model="stock.unitaryValue" name="stockValue" required ui-money-mask>
+							<div ng-messages="stockForm.stockValue.$error">
+								<div ng-message="required">Valor obrigatório.</div>
+							</div>
+						</md-input-container>
+						<md-input-container class="md-block" flex='15'>
+							<label>Estoque minimo</label>
+							<input ng-model="stock.minimum" name="stockMinimum" required ng-pattern="/^[0-9]+$/">
+							<div ng-messages="stockForm.stockMinimum.$error">
+								<div ng-message="required">Estoque minimo obrigatório.</div>
+								<div ng-message="pattern">Estoque minimo deve conter apenas números</div>
+							</div>
+						</md-input-container>
+					</div>
+					<div layout-gt-sm="row">
+						<h3>
+							<strong>Nota Fiscal</strong>
+						</h3>
+					</div>
+					<div layout-gt-sm="row">
+						<md-input-container class="md-block" flex='100'>
+							<label>Número - NF</label>
+							<input ng-model="stock.invoice" type="text" name="invoice">
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<label>Responsável - NF</label>
+							<input ng-model="stock.invoiceResp" type="text" name="invoiceResp">
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<!--<input type="date" ng-model="stock.emissionDate" name="emissionDate" md-placeholder="Data Emissão - NF" />-->
+							<label>Data de Emissão - NF</label>
+							<md-datepicker ng-model="stock.emissionDate" md-open-on-focus></md-datepicker>
+						</md-input-container>
+						<md-input-container class="md-block" flex='100'>
+							<!--<input type="date" ng-model="stock.enterDateInvoice" name="enterDateInvoice" md-placeholder="Data Entrada - NF" />-->
+							<label>Data de Entrada - NF</label>
+							<md-datepicker ng-model="stock.enterDateInvoice" md-open-on-focus></md-datepicker>
+						</md-input-container>
+					</div>
+					<div layout-gt-sm="row">
+						<md-button class="md-raised" style="margin-top: 10px;" ng-click="addLocation();">ADICIONAR LOCALIZAÇÃO</md-button>
+					</div>
+					<div layout="row" layout-wrap>
+						<div md-whiteframe="3" ng-repeat="location in listLocation" flex-xs="100" flex="45" style="margin: 20px;">
+							<div layout-gt-sm="row">
+								<span flex></span>
+								<md-button ng-click="removeLocation($index);" class="md-icon-button" aria-label="More">
+									<md-icon class="material-icons">close</md-icon>
+								</md-button>
+							</div>
+							<div layout-gt-sm="row">
+								<md-input-container class="md-block" flex='100'>
+									<label>Container:</label>
+									<md-select required ng-model="location.container.id" name="locationId">
+										<md-option ng-repeat="container in listContainer" ng-value="container.id">{{container.name}}</md-option>
+									</md-select>
+									<div ng-messages="stockForm.locationId.$error">
+										<div ng-message="required">Localização do container obrigatória.</div>
+									</div>
+								</md-input-container>
+								<md-input-container class="md-block" flex='100'>
+									<label>Posição:</label>
+									<input ng-model="location.position" type="text" name="locationPosition" required/>
+									<div ng-messages="stockForm.locationPosition.$error">
+										<div ng-message="required">Posição obrigatória.</div>
+									</div>
+								</md-input-container>
+							</div>
+							<div layout-gt-sm="row">
+								<md-input-container class="md-block" flex='100'>
+									<label>Quantidade no container:</label>
+									<input ng-model="location.quantity" type="number" name="locationQuantity" required/>
+									<div ng-messages="stockForm.locationQuantity.$error">
+										<div ng-message="required">Quantidade minima obrigatória.</div>
+									</div>
+								</md-input-container>
+							</div>
+							<div layout-gt-sm="row">
+								<md-input-container class="md-block" flex='100'>
+									<label>Observação</label>
+									<input ng-model="location.note" type="text">
+								</md-input-container>
+							</div>
+						</div>
+					</div>
+				</div>
+			</md-dialog-content>
+			<md-dialog-actions layout="row">
+				<span flex></span>
+				<md-button ng-click="cancel()">CANCELAR</md-button>
+				<md-button ng-click="save(stock,listLocation)" ng-disabled="stockForm.$invalid">CONFIRMAR</md-button>
+			</md-dialog-actions>
+		</form>
+	</md-dialog>
+
+
+</script>

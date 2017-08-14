@@ -1,0 +1,191 @@
+
+<div>
+	<md-toolbar class="md-table-toolbar md-default">
+		<div class="md-toolbar-tools">
+			<span>REQUISIÇÕES PENDENTES</span>
+			<span flex></span>
+			<div ng-show="showSearch" flex="auto">
+				<md-button style="float: right;" class="md-icon-button" aria-label="Search" ng-click="showSearch = false; search = '';">
+					<md-icon class="whitet">close</md-icon>
+				</md-button>
+				<input class="input-search" ng-model="search" placeholder="Pesquisar...">				
+			</div>
+			<div ng-show="!showSearch">
+				<md-button class="md-icon-button" aria-label="Search" ng-click="showSearch = true">
+					<md-icon class="whitet">search</md-icon>
+				</md-button>
+			</div>
+		</div>
+	</md-toolbar>
+
+	<!-- exact table from live demo -->
+	<md-table-container>
+		<table md-table  multiple>
+			<thead md-head>
+				<tr md-row>
+					<!--<th md-column><span>QUANTIDADE</span></th>-->
+					<th md-column><span>ID<span></th>
+					<th md-column><span>ESTOQUE</span></th>
+					<th md-column><span>STATUS</span></th>
+					<th md-column><span>DATA REQ.</span></th>
+					<th md-column><span>REQ. POR</span></th>
+					<th md-column><span>AÇÃO</span></th>
+					<!-- th md-column><span>COD.</span></th>
+					<th md-column><span>TÃ�TULO</span></th>
+					<th md-column><span>QUANTIDADE</span></th>
+					<th md-column><span>STATUS</span></th>
+					<th md-column><span>DATA</span></th>
+					<th md-column><span>REQ. POR</span></th>
+					<th md-column><span>INSTITUIÃ‡ÃƒO</span></th>
+					<th md-column><span>CATEGORIA</span></th>
+					<th md-column><span>SUB-CATEGORIA</span></th>
+					<th md-column><span>AÃ‡ÃƒO</span></th-->
+				</tr>
+			</thead>
+			<tbody>
+				<tr  md-row ng-repeat="item in listRequest | filter:search;">
+					<td md-cell>{{item.id}}</td>
+					<td md-cell>
+						<md-button class="md-icon-button" ng-click="viewStock(item.id);" title="VISUALIZAR O ESTOQUE" aria-label="deleteUser">
+							<md-icon class="material-icons">visibility</md-icon>
+						</md-button>
+					</td>
+					<!--<td md-cell>{{item.quantity}}</td>-->
+					<td md-cell>{{item.status | traslateStatus}}</td>
+					<td md-cell>{{item.dateRequest | date:'dd/MM/yyyy HH:mm:ss' : 'UTC'}}</td>
+					<td md-cell>{{item.user.name}}</td>
+					<!-- td md-cell>{{item.Id}}</td>
+					<td md-cell>{{item.stock.title}}</td>
+					<td md-cell>{{item.quantity}}</td>
+					<td md-cell>{{item.status | traslateStatus}}</td>
+					<td md-cell>{{item.dateRequest | date:'dd/MM/yyyy HH:mm:ss' : 'UTC'}}</td>
+					<td md-cell>{{item.user.name}}</td>
+					<td md-cell>Senai SUL</td>
+					<td md-cell>{{item.stock.subCategory.category.name}}</td>
+					<td md-cell>{{item.stock.subCategory.name}}</td-->
+					<td md-cell>
+						<md-button class="md-icon-button" ng-click="confirmRequest(item,$index)">
+							<md-icon class="material-icons">check</md-icon>
+						</md-button>
+						<md-button class="md-icon-button" ng-click="confirmReject(item,$index)">
+							<md-icon class="material-icons">clear</md-icon>
+						</md-button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</md-table-container>
+</div>
+
+<script type="text/ng-template" id="requestViewModal.html">
+	<md-dialog aria-label="RequestModal" style="width: 50%;">
+		<md-toolbar class="primary-color">
+			<div class="md-toolbar-tools">
+				<h2>INFORMAÇÕES DA REQUISIÇÃO</h2>
+				<span flex></span>
+				<md-button class="md-icon-button" ng-click="ctrl.cancel()">
+					<md-icon class="material-icons">close</md-icon>
+				</md-button>
+			</div>
+		</md-toolbar>
+		<md-dialog-content ng-cloak>
+			<div class="md-dialog-content" ng-repeat="item in ctrl.listStock">
+				<p><strong>Título: </strong> {{item.stock.title}}</p>
+				<p><strong>Quantidade: </strong> {{item.quantity}}</p>
+				<p><strong>Valor unitário: </strong> R$ {{item.stock.unitaryValue}}</p>
+				<p><strong>Valor total do item: </strong> R$ {{item.stock.unitaryValue * item.quantity}}</p>
+			</div>
+			<div class="md-dialog-content">
+				<p><strong>Quantidade total: </strong> {{ctrl.total}}</p>
+				<p><strong>Valor total: </strong> R$ {{ctrl.totalValue}}</p>
+			</div>
+		</md-dialog-content>
+	</md-dialog>
+</script>
+
+<script type="text/ng-template" id="rejectRequest.html">
+	<md-dialog aria-label="modalEdit">
+		<form ng-cloak>
+			<md-toolbar class="color-primary">
+				<div class="md-toolbar-tools">
+					<md-icon flex="10" class="material-icons">edit</md-icon>
+					<h2>ReprovaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o da requisiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</h2>
+					<span flex></span>
+					<md-button class="md-icon-button" ng-click="cancel()">
+						<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+					</md-button>
+				</div>
+			</md-toolbar>
+
+			<md-dialog-content>
+				<div class="md-dialog-content" style="min-width:950px;">
+					<md-input-container class="md-block">
+						<label>Motivo</label>
+						<input>
+					</md-input-container>
+				</div>
+			</md-dialog-content>
+
+			<md-dialog-actions layout="row">
+				<span flex></span>
+				<md-button ng-click="cancel()">
+					Cancelar
+				</md-button>
+				<md-button ng-click="save()">
+					Confirmar
+				</md-button>
+			</md-dialog-actions>
+		</form>
+	</md-dialog>
+</script>
+
+<script type="text/ng-template" id="confirmRequest.html">
+
+	<md-dialog aria-label="modalEdit">
+		<form ng-cloak>
+			<md-toolbar class="primary-color">
+				<div class="md-toolbar-tools">
+					<md-icon flex="10" class="material-icons">edit</md-icon>
+					<h2>AprovasÃƒÆ’Ã‚Â£o da requisiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</h2>
+					<span flex></span>
+					<md-button class="md-icon-button" ng-click="cancel()">
+						<md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+					</md-button>
+				</div>
+			</md-toolbar>
+
+			<md-dialog-content>
+				<div class="md-dialog-content" style="min-width:950px;">
+					<md-input-container class="md-block">
+						<label>TÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulo</label>
+						<input value="Mecatronica Avancada">
+					</md-input-container>
+					<md-input-container class="md-block">
+						<label>Quantidade</label>
+						<input value="138">
+					</md-input-container>
+					<md-input-container class="md-block">
+						<label>InstituiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o</label>
+						<input value="Senai SUL">
+					</md-input-container>
+					<md-input-container class="md-block">
+						<label>Categoria</label>
+						<input value="Mecatronica">
+					</md-input-container>
+				</div>
+			</md-dialog-content>
+
+			<md-dialog-actions layout="row">
+				<span flex></span>
+				<md-button ng-click="cancel()">
+					Cancelar
+				</md-button>
+				<md-button ng-click="save()">
+					Confirmar
+				</md-button>
+			</md-dialog-actions>
+		</form>
+	</md-dialog>
+
+
+</script>
